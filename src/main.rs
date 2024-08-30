@@ -10,7 +10,7 @@ use reqwest::{header, Client, Method, StatusCode};
 use std::str::FromStr;
 use tokio::net::TcpListener;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
-use tracing::{error, info, info_span, Level};
+use tracing::{error, info, info_span, warn, Level};
 use tracing_subscriber::{filter::Targets, layer::SubscriberExt, util::SubscriberInitExt};
 use uuid::Uuid;
 
@@ -27,6 +27,10 @@ async fn main() -> anyhow::Result<()> {
         .init();
 
     // Set up application
+    let shutdown_signal = async {
+        _ = tokio::signal::ctrl_c().await;
+        warn!("Initiating graceful shutdown");
+    };
     dotenv().ok();
     let address = std::env::var("ADDRESS")?;
     let state = AppState::default();
@@ -56,7 +60,9 @@ async fn main() -> anyhow::Result<()> {
     info!("Listening on {:?}", listener.local_addr().unwrap());
 
     // Run app
-    axum::serve(listener, app.into_make_service()).await?;
+    axum::serve(listener, app.into_make_service())
+        .with_graceful_shutdown(shutdown_signal)
+        .await?;
 
     Ok(())
 }
