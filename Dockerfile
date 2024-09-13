@@ -19,13 +19,12 @@ WORKDIR app
 
 RUN apt-get update -y \ 
 && apt-get install -y --no-install-recommends curl ca-certificates gcc libc6-dev pkg-config libssl-dev \
-# Clena up
+# Clean up
 && apt-get autoremove -y \ 
 && apt-get clean -y \
 && rm -rf /var/lib/apt/lists/* \
 ;
 
 COPY --from=builder /app/target/debug/catscii catscii
-COPY --from=builder /app/.env .env
 
 ENTRYPOINT ["./catscii"]
