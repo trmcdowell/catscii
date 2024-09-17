@@ -4,15 +4,17 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = "1.0.89"
 artem = { version = "3.0.0", default-features = false }
-axum = "0.7.5"
+axum = "0.7"
 dotenv = "0.15.0"
 image = "0.25.2"
+maxminddb = "0.24.0"
 pretty-hex = "0.4.1"
 reqwest = { version = "0.12.7", features = ["json"] }
-serde = { version = "1.0.209", features = ["derive"] }
-tokio = { version = "1.39.3", features = ["full"] }
+rusqlite = "0.32.1"
+serde = { version = "1.0.210", features = ["derive"] }
+tokio = { version = "1.40.0", features = ["full"] }
 tower-http = { version = "0.5.2", features = ["cors", "trace"] }
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["json"] }

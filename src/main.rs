@@ -1,16 +1,15 @@
 use axum::{
-    body::Body,
-    extract::{MatchedPath, Request, State},
-    response::{IntoResponse, Response},
+    extract::{MatchedPath, Request},
     routing::get,
     Router,
 };
+use catscii::{analytics_get, health_check, locat::Locat, root_get, ServerState};
 use dotenv::dotenv;
-use reqwest::{header, Client, Method, StatusCode};
-use std::str::FromStr;
+use reqwest::Method;
+use std::{str::FromStr, sync::Arc};
 use tokio::net::TcpListener;
 use tower_http::{cors::CorsLayer, trace::TraceLayer};
-use tracing::{error, info, info_span, warn, Level};
+use tracing::{info, info_span, warn, Level};
 use tracing_subscriber::{filter::Targets, layer::SubscriberExt, util::SubscriberInitExt};
 use uuid::Uuid;
 
@@ -31,11 +30,20 @@ async fn main() -> anyhow::Result<()> {
         _ = tokio::signal::ctrl_c().await;
         warn!("Initiating graceful shutdown");
     };
+
     dotenv().ok();
-    let address = std::env::var("ADDRESS")?;
-    let state = AppState::default();
+    let address = std::env::var("ADDRESS").expect("$ADDRESS must be set");
+    let country_db_path =
+        std::env::var("GEOLITE2_COUNTRY_DB").expect("$GEOLITE2_COUNTRY_DB must be set");
+    let analytics_db_path = std::env::var("ANALYTICS_DB").expect("$ANALYTICS_DB must be set");
+
+    let state = ServerState {
+        client: Default::default(),
+        locat: Arc::new(Locat::new(&country_db_path, &analytics_db_path).unwrap()),
+    };
     let app: Router = Router::new()
-        .route("/", get(get_cat_ascii_art))
+        .route("/", get(root_get))
+        .route("/analytics", get(analytics_get))
         .route("/health_check", get(health_check))
         .layer(CorsLayer::new().allow_methods([Method::GET]))
         .layer(
@@ -65,50 +73,4 @@ async fn main() -> anyhow::Result<()> {
         .await?;
 
     Ok(())
-}
-
-async fn get_cat_ascii_art(State(state): State<AppState>) -> Response<Body> {
-    match create_cat_ascii_art(state).await {
-        Ok(art) => (
-            StatusCode::OK,
-            [(header::CONTENT_TYPE, "text/html; charset=utf-8")],
-            art,
-        )
-            .into_response(),
-        Err(e) => {
-            error!("Error getting ascii art: {e}");
-            (StatusCode::INTERNAL_SERVER_ERROR, "Error getting ascii art").into_response()
-        }
-    }
-}
-
-async fn create_cat_ascii_art(state: AppState) -> anyhow::Result<String> {
-    let image_bytes = download_file(&state.client, "https://cataas.com/cat").await?;
-    let image = image::load_from_memory(&image_bytes)?;
-    let artem_config = artem::config::ConfigBuilder::new()
-        .target(artem::config::TargetType::HtmlFile)
-        .build();
-    let ascii = artem::convert(image, &artem_config);
-
-    Ok(ascii)
-}
-
-async fn download_file(client: &Client, url: &str) -> anyhow::Result<Vec<u8>> {
-    let bytes = client
-        .get(url)
-        .send()
-        .await?
-        .error_for_status()?
-        .bytes()
-        .await?;
-    Ok(bytes.to_vec())
-}
-
-async fn health_check() -> Response<Body> {
-    (StatusCode::OK, "Application is healthy").into_response()
-}
-
-#[derive(Clone, Default)]
-struct AppState {
-    client: reqwest::Client,
 }

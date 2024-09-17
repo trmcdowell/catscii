@@ -18,7 +18,8 @@ FROM debian:bookworm-slim AS runtime
 WORKDIR app
 
 RUN apt-get update -y \ 
-&& apt-get install -y --no-install-recommends ca-certificates libc6-dev pkg-config libssl-dev \
+&& apt-get install -y --no-install-recommends \
+ca-certificates libc6-dev pkg-config libssl-dev libsqlite3-dev \
 # Clean up
 && apt-get autoremove -y \ 
 && apt-get clean -y \
@@ -26,5 +27,9 @@ RUN apt-get update -y \
 ;
 
 COPY --from=builder /app/target/debug/catscii catscii
+
+# Copy Geolite2 db
+RUN mkdir /db
+COPY ./db/GeoLite2-Country.mmdb /db/
 
 ENTRYPOINT ["./catscii"]
