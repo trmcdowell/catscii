@@ -2,7 +2,7 @@
 
 fasterthanlime series project with a bunch of personal modifications.
 
-Serves cat pictures as ascii art over the internet. Also geolocates by country and stores in analytics db, this only works when deployed due to dependency on a fly.io specific header.
+Serves cat pictures as ascii art over the internet. Also geolocates by country, but this only works when deployed due to dependency on a fly.io specific header.
 
 Build Docker image
 ```
