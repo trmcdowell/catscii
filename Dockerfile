@@ -18,7 +18,7 @@ FROM debian:bookworm-slim AS runtime
 WORKDIR app
 
 RUN apt-get update -y \ 
-&& apt-get install -y --no-install-recommends curl ca-certificates gcc libc6-dev pkg-config libssl-dev \
+&& apt-get install -y --no-install-recommends ca-certificates libc6-dev pkg-config libssl-dev \
 # Clean up
 && apt-get autoremove -y \ 
 && apt-get clean -y \
