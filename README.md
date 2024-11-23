@@ -12,6 +12,7 @@ docker build --tag catscii .
 ```
 
 Run Docker image locally
+```
 docker run --env-file ./.env -it -p <port>:<port>/tcp --rm catscii 
 ```
 
