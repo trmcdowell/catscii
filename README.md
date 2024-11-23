@@ -1,6 +1,6 @@
 # catscii
 
-fasterthanlime series project with a bunch of personal modifications.
+A modified [fasterthanlime](https://fasterthanli.me/) series project
 
 Serves cat pictures as ascii art over the internet. Also geolocates by country, but this only works when deployed due to dependency on a fly.io specific header.
 
