@@ -1,6 +1,6 @@
 # catscii
 
-My version catscii, an application from a [fasterthanlime series](https://fasterthanli.me/series/building-a-rust-service-with-nix).
+My version of catscii, an application from a [fasterthanlime series](https://fasterthanli.me/series/building-a-rust-service-with-nix).
 
 Serves cat pictures as ascii art over the internet. Also geolocates by country, but this only works when deployed due to dependency on a fly.io specific header.
 
